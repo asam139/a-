@@ -145,6 +145,9 @@ class Body {
     };
     // Array of nodes in its physical position
     Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
+
+    void DrawNodes() const;
+    void InitNodes();
 };
 
 #endif

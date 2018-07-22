@@ -30,6 +30,8 @@ bool Window::init(const char* name, const uint32_t width, const uint32_t height)
             return false;
         } else {
             renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
+            SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+
             if (!renderer_) {
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
                 return false;

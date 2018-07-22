@@ -73,8 +73,8 @@ void DebugDraw::renderRect(const Vec2& pos,
     SDL_Renderer* renderer = Window::instance().getRenderer();
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_Rect rect = {
-            (int)(pos.x() - width * 0.5f),
-            (int)(pos.y() - height * 0.5f),
+            (int)pos.x(),
+            (int)pos.y(),
             (int)width,
             (int)height
     };

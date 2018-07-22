@@ -87,15 +87,7 @@ void Body::render() const {
     DebugDraw::drawVector(dd.blue.pos, dd.blue.v, 0x00, 0x00, 0xFF, 0xFF);
     DebugDraw::drawPositionHist(_state.position);
 
-    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
-        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
-            Node node = _nodes[i][j];
-            Vec2 fPos;
-            fPos.x() = node.position.x;
-            fPos.y() = node.position.y;
-            DebugDraw::drawRect(fPos, TILED_SIZE * 8, TILED_SIZE* 8, 0x00, 0x00, 0x00, 0xFF);
-        }
-    }
+    DrawNodes();
 }
 
 void Body::setTarget(Agent* target) {
@@ -430,4 +422,29 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
     endNode.parent = {0, 0};
     endNode.G = 0;
 
+    InitNodes();
+}
+
+void Body::DrawNodes() const {
+    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
+        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
+            Node node = _nodes[i][j];
+            Vec2 fPos;
+            fPos.x() = node.position.x * TILED_SIZE;
+            fPos.y() = node.position.y * TILED_SIZE;
+            DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0x00, 0x00, 0x80);
+        }
+    }
+}
+
+void Body::InitNodes() {
+    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
+        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
+            Node *node = &_nodes[i][j];
+            node->position.x = j;
+            node->position.y = i;
+            node->parent = {0, 0};
+            node->G = 0;
+        }
+    }
 }
