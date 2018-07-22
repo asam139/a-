@@ -1,0 +1,12 @@
+//
+// Created by Saul Moreno Abril on 14/07/2018.
+//
+
+#ifndef A_STEERINGBEHAVIOURSCONFIG_H
+#define A_STEERINGBEHAVIOURSCONFIG_H
+
+// the configured options and settings for Tutorial
+#define A_VERSION_MAJOR @A_VERSION_MAJOR@
+#define A_VERSION_MINOR @A_VERSION_MINOR@
+
+#endif //STEERING_BEHAVIOURS_STEERINGBEHAVIOURSCONFIG_H
