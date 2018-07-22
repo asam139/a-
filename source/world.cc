@@ -6,11 +6,11 @@
 
 World::World() {
     target_.init(this, Body::Color::Red, Body::Type::Manual);
-    ia_.init(this, Body::Color::Green, Body::Type::Autonomous);
+    target_.getKinematic()->position = Vec2(WINDOW_HALF_WIDTH * 0.25f, WINDOW_HALF_HEIGHT * 0.25f);
 
-    const float _w = WINDOW_WIDTH * 0.5;
-    const float _h = WINDOW_HEIGHT * 0.5;
-    ia_.getKinematic()->position = Vec2(_w, _h);
+
+    //ia_.init(this, Body::Color::Green, Body::Type::Autonomous);
+    //ia_.getKinematic()->position = Vec2(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     /*for (int i = 0; i < 20; ++i) {
         auto agent_ptr = std::shared_ptr<Agent>(new Agent());
@@ -27,7 +27,7 @@ World::World() {
 
 World::~World() {
     target_.shutdown();
-    ia_.shutdown();
+    //ia_.shutdown();
     for (auto a : _agentArray) {
         a->shutdown();
     }
@@ -36,7 +36,7 @@ World::~World() {
 
 void World::update(const float dt) {
     target_.update(dt);
-    ia_.update(dt);
+    //ia_.update(dt);
 
     for (auto a : _agentArray) {
         a->update(dt);
@@ -46,7 +46,7 @@ void World::render() {
     _mapSprite.render();
 
     target_.render();
-    ia_.render();
+    //ia_.render();
 
     for (auto a : _agentArray) {
         a->render();
@@ -62,7 +62,7 @@ Agent* World::ia() {
 }
 
 void World::setAISteering(Body::SteeringMode steering) {
-    ia()->setSteering(steering);
+    //ia()->setSteering(steering);
     for (auto a : _agentArray) {
         a->setSteering(steering);
     }

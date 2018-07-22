@@ -30,15 +30,20 @@ public:
     Agent* ia();
 
     void setAISteering(Body::SteeringMode steering);
+
+    uint8_t (*getCostMap())[COST_MAP_WIDTH][COST_MAP_WIDTH] {
+        return &_costMap;
+    }
 private:
     Sprite _mapSprite;
 
     std::vector< std::shared_ptr< Agent > > _agentArray;
     Agent target_, ia_;
 
-    void LoadCostMap();
+
     //  Tile Map
     uint8_t _costMap[COST_MAP_WIDTH][COST_MAP_HEIGHT];
+    void LoadCostMap();
 };
 
 #endif

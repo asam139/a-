@@ -65,6 +65,23 @@ void DebugDraw::renderPositionHist() {
   }
 }
 
+void DebugDraw::renderRect(const Vec2& pos,
+                       const float width,
+                       const float height,
+                       const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) {
+  if (enabled_) {
+    SDL_Renderer* renderer = Window::instance().getRenderer();
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_Rect rect = {
+            (int)(pos.x() - width * 0.5f),
+            (int)(pos.y() - height * 0.5f),
+            (int)width,
+            (int)height
+    };
+    SDL_RenderFillRect(renderer, &rect);
+  }
+}
+
 void DebugDraw::drawVector(const Vec2& pos, const Vec2& v,
                            const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) {
   Command com;
@@ -95,12 +112,30 @@ void DebugDraw::drawPositionHist(const Vec2& pos) {
   hist_[hist_idx_++ % MAX_HIST] = pos;
 }
 
+void DebugDraw::drawRect(const Vec2& pos,
+                     const float width,
+                     const float height,
+                     const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) {
+  Command com;
+  com.type = CommandType::Rect;
+  com.pos = pos;
+  com.dir = Vec2(0.0f, 0.0f);
+  com.r = r;
+  com.g = g;
+  com.b = b;
+  com.a = a;
+  com.width = width;
+  com.height = height;
+  command_list_.push_back(com);
+}
+
 void DebugDraw::render() {
   if (enabled_) {
     for(auto& command:command_list_) {
       switch(command.type) {
         case CommandType::Vector: renderVector(command.pos, command.dir, command.r, command.g, command.b, command.a); break;
         case CommandType::Cross: renderCross(command.pos, command.r, command.g, command.b, command.a); break;
+        case CommandType::Rect: renderRect(command.pos, command.width, command.height, command.r, command.g, command.b, command.a); break;
       }
     }
     renderPositionHist();

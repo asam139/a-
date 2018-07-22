@@ -34,6 +34,10 @@ public:
     }
     const KinematicStatus* getKinematic() const { return body_.getKinematic(); }
     KinematicStatus* getKinematic() { return body_.getKinematic(); }
+
+    void SetFinalPosition(Vec2 finalPosition) {
+        body_.SetFinalPosition(finalPosition);
+    }
 private:
     World * world_;
 

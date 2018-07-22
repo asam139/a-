@@ -24,6 +24,11 @@ public:
                           const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
     static void drawPositionHist(const Vec2& pos);
 
+    static void drawRect(const Vec2& pos,
+                          const float width,
+                          const float height,
+                          const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
+
     static void toggleEnabled() { enabled_ = !enabled_; };
 private:
     static void renderVector(const Vec2& pos, const Vec2& v,
@@ -31,6 +36,11 @@ private:
     static void renderCross(const Vec2& pos,
                             const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
     static void renderPositionHist();
+
+    static void renderRect(const Vec2& pos,
+                         const float width,
+                         const float height,
+                         const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
 
     static bool enabled_;
     static float delta_;
@@ -41,7 +51,8 @@ private:
 
     enum class CommandType {
         Vector,
-        Cross
+        Cross,
+        Rect
     };
 
     struct Command {
@@ -52,6 +63,8 @@ private:
         uint8_t g;
         uint8_t b;
         uint8_t a;
+        float width;
+        float height;
     };
 
     static std::vector<Command> command_list_;

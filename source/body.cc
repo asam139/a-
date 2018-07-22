@@ -10,6 +10,7 @@
 #include <debug_draw.h>
 #include <agent.h>
 #include <movementUtils.h>
+#include <window.h>
 
 void Body::init(const Color color, const Type type, Agent* agent) {
     _type = type;
@@ -26,6 +27,9 @@ void Body::init(const Color color, const Type type, Agent* agent) {
     }
 
     _steering_mode = SteeringMode::Kinematic_Seek;
+
+
+    _finalPosition = _state.position;
 }
 
 void Body::update(const float dt) {
@@ -76,12 +80,22 @@ void Body::updateManual(const float dt) {
 }
 
 void Body::render() const {
-  _sprite.render();
+    _sprite.render();
 
-  DebugDraw::drawVector(dd.red.pos, dd.red.v, 0xFF, 0x00, 0x00, 0xFF);
-  DebugDraw::drawVector(dd.green.pos, dd.green.v, 0x00, 0x50, 0x00, 0xFF);
-  DebugDraw::drawVector(dd.blue.pos, dd.blue.v, 0x00, 0x00, 0xFF, 0xFF);
-  DebugDraw::drawPositionHist(_state.position);
+    DebugDraw::drawVector(dd.red.pos, dd.red.v, 0xFF, 0x00, 0x00, 0xFF);
+    DebugDraw::drawVector(dd.green.pos, dd.green.v, 0x00, 0x50, 0x00, 0xFF);
+    DebugDraw::drawVector(dd.blue.pos, dd.blue.v, 0x00, 0x00, 0xFF, 0xFF);
+    DebugDraw::drawPositionHist(_state.position);
+
+    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
+        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
+            Node node = _nodes[i][j];
+            Vec2 fPos;
+            fPos.x() = node.position.x;
+            fPos.y() = node.position.y;
+            DebugDraw::drawRect(fPos, TILED_SIZE * 8, TILED_SIZE* 8, 0x00, 0x00, 0x00, 0xFF);
+        }
+    }
 }
 
 void Body::setTarget(Agent* target) {
@@ -393,4 +407,27 @@ void Body::update_wander(const float dt) {
 }
 
 
-// Flocking
+// PathFinding
+
+void Body::SetFinalPosition(Vec2 finalPosition) {
+    _finalPosition = finalPosition;
+
+    Node initNode;
+    initNode.position = {
+            static_cast<unsigned int>(_state.position.x() / TILED_SIZE),
+                    static_cast<unsigned int>(_state.position.y() / TILED_SIZE)
+    };
+    initNode.state = 0;
+    initNode.parent = initNode.position;
+    initNode.G = 0;
+
+    Node endNode;
+    endNode.position = {
+            static_cast<unsigned int>(_finalPosition.x() / TILED_SIZE),
+            static_cast<unsigned int>(_finalPosition.y() / TILED_SIZE)
+    };
+    endNode.state = 0;
+    endNode.parent = {0, 0};
+    endNode.G = 0;
+
+}

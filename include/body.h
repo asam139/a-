@@ -56,14 +56,19 @@ class Body {
 
     void setTarget(Agent* target);
     void setSteering(const SteeringMode steering) { _steering_mode = steering; };
+
     void setAgentGroup(std::vector<std::shared_ptr<Agent>>* agentGroup) {
         _agentGroup = agentGroup;
     }
     std::vector<std::shared_ptr<Agent>>*  getAgentGroup() {
         return _agentGroup;
     }
+
     const KinematicStatus* getKinematic() const { return &_state; }
     KinematicStatus* getKinematic() { return &_state; }
+
+    void SetFinalPosition(Vec2 finalPosition);
+
   private:
     void updateManual(const float dt);
     void updateAutonomous(const float dt);
@@ -124,6 +129,22 @@ class Body {
 
     KinematicStatus _state;
     KinematicSteering _steering;
+
+    MathLib::Vec2 _finalPosition = {0.0f, 0.0f};
+
+    struct tiledPosition {
+        unsigned int x;
+        unsigned int y;
+    } ;
+
+    struct  Node { //struct to hold nodes on location list
+        tiledPosition position;
+        unsigned int state; //is in open or closed list
+        tiledPosition parent; //position on tilemap of his parent (x,y)
+        unsigned short G; //G cost
+    };
+    // Array of nodes in its physical position
+    Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
 };
 
 #endif

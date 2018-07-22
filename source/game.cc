@@ -11,6 +11,7 @@
 #include <debug_draw.h>
 
 #include <cstdio>
+#include <unistd.h>
 
 void Game::init() {
     font_ = TTF_OpenFont(FONT_FILE, FPS_FONT_SIZE);
@@ -20,7 +21,6 @@ void Game::init() {
 
     fps_sprite_.setVisible(false);
 
-    world_.target()->getKinematic()->position = MathLib::Vec2(0.0f, 0.0f);
 }
 
 void Game::start() {
@@ -80,7 +80,8 @@ void Game::handleInput() {
                 int x, y;
                 SDL_GetMouseState(&x, &y);
 
-                world_.target()->getKinematic()->position = Vec2(x, y);
+                world_.target()->SetFinalPosition(Vec2(x, y));
+                //world_.target()->getKinematic()->position = Vec2(x, y);
             }
         }
 
