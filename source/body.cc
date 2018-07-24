@@ -11,6 +11,7 @@
 #include <agent.h>
 #include <movementUtils.h>
 #include <window.h>
+#include <algorithm>
 
 void Body::init(const Color color, const Type type, Agent* agent) {
     _type = type;
@@ -404,47 +405,116 @@ void Body::update_wander(const float dt) {
 void Body::SetFinalPosition(Vec2 finalPosition) {
     _finalPosition = finalPosition;
 
-    Node initNode;
-    initNode.position = {
-            static_cast<unsigned int>(_state.position.x() / TILED_SIZE),
-                    static_cast<unsigned int>(_state.position.y() / TILED_SIZE)
-    };
-    initNode.state = 0;
-    initNode.parent = initNode.position;
-    initNode.G = 0;
 
-    Node endNode;
-    endNode.position = {
+    InitNodes();
+
+    tiledPosition startTiledPosition = {
+            static_cast<unsigned int>(_state.position.x() / TILED_SIZE),
+            static_cast<unsigned int>(_state.position.y() / TILED_SIZE)
+    };
+    Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
+    initNode->state = 0;
+    initNode->parent = startTiledPosition;
+    initNode->G = 0;
+    PrintNode(*initNode);
+
+    tiledPosition endTiledPosition = {
             static_cast<unsigned int>(_finalPosition.x() / TILED_SIZE),
             static_cast<unsigned int>(_finalPosition.y() / TILED_SIZE)
     };
-    endNode.state = 0;
-    endNode.parent = {0, 0};
-    endNode.G = 0;
 
-    InitNodes();
+    Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
+    endNode->state = 0;
+    endNode->parent = {0, 0};
+    endNode->G = 0;
+    PrintNode(*endNode);
+
+    currentStateValue.opened = 50;
+    currentStateValue.closed = 5000;
+
+    initNode->state = currentStateValue.opened;
+
+    bool finished = false;
+    do {
+        int minF = INT_MAX;
+        Node *nextNode = nullptr;
+        for (int i = 0; i < COST_MAP_WIDTH; ++i) {
+            for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
+                Node *node = &_nodes[i][j];
+                if (node->state != currentStateValue.opened) {
+                    continue;
+                }
+
+                unsigned int G = node->G;
+                unsigned int H = heuristicManhattan(*node, *endNode);
+                unsigned int F = G + H;
+                if (F < minF) {
+                    nextNode = node;
+                }
+
+            }
+        }
+
+        if (nextNode != nullptr) {
+            PrintNode(*nextNode);
+        }
+        finished = true;
+
+
+
+    } while (!finished);
+
 }
 
 void Body::DrawNodes() const {
-    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
-        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
-            Node node = _nodes[i][j];
-            Vec2 fPos;
-            fPos.x() = node.position.x * TILED_SIZE;
-            fPos.y() = node.position.y * TILED_SIZE;
-            DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0x00, 0x00, 0x80);
+    for (int i = 0; i < COST_MAP_WIDTH; ++i) {
+        for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
+            const Node *node = &_nodes[i][j];
+            if (node->state == currentStateValue.opened) {
+                Vec2 fPos;
+                fPos.x() = node->position.x * TILED_SIZE;
+                fPos.y() = node->position.y * TILED_SIZE;
+                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0xFF, 0x00, 0x00, 0x80);
+            } else if (node->state == currentStateValue.closed) {
+                Vec2 fPos;
+                fPos.x() = node->position.x * TILED_SIZE;
+                fPos.y() = node->position.y * TILED_SIZE;
+                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0xFF, 0x00, 0x80);
+            }
         }
     }
 }
 
 void Body::InitNodes() {
-    for (int i = 0; i < COST_MAP_HEIGHT; ++i) {
-        for (int j = 0; j < COST_MAP_WIDTH; ++j) {
+    for (int i = 0; i < COST_MAP_WIDTH; ++i) {
+        for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
             Node *node = &_nodes[i][j];
-            node->position.x = j;
-            node->position.y = i;
+            node->position.x = i;
+            node->position.y = j;
             node->parent = {0, 0};
             node->G = 0;
         }
     }
+}
+
+void Body::PrintNode(const Node &node) const {
+    printf("Node: position(%d, %d)", node.position.x, node.position.y);
+}
+
+uint16_t Body::heuristicManhattan(const Node& node, const Node& goal) {
+    const uint16_t xDist = node.position.x - goal.position.x;
+    const uint16_t yDist = node.position.x - goal.position.y;
+    return 10 * (xDist + yDist);
+}
+
+uint16_t Body::heuristicDiagonal(const Node& node, const Node& goal) {
+    const uint16_t xDist = node.position.x - goal.position.x;
+    const uint16_t yDist = node.position.y - goal.position.y;
+    return (10 * (xDist + yDist)) + ((14 - (10 * 2)) * std::min(xDist, yDist));
+}
+
+uint16_t Body::heuristicEuclidean(const Node& node, const Node& goal) {
+    const uint16_t xDist = node.position.x - goal.position.x;
+    const uint16_t yDist = node.position.y - goal.position.y;
+    return 10 * sqrt((xDist * xDist) + (yDist * yDist));
 }

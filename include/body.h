@@ -135,7 +135,7 @@ class Body {
     struct tiledPosition {
         unsigned int x;
         unsigned int y;
-    } ;
+    };
 
     struct  Node { //struct to hold nodes on location list
         tiledPosition position;
@@ -146,8 +146,20 @@ class Body {
     // Array of nodes in its physical position
     Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
 
+    //
+    struct stateValue {
+        unsigned int opened;
+        unsigned int closed;
+    };
+    stateValue currentStateValue;
+
     void DrawNodes() const;
     void InitNodes();
+    void PrintNode(const Node &node) const;
+
+    uint16_t heuristicManhattan(const Node& node, const Node& goal);
+    uint16_t heuristicDiagonal(const Node& node, const Node& goal);
+    uint16_t heuristicEuclidean(const Node& node, const Node& goal);
 };
 
 #endif
