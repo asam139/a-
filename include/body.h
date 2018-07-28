@@ -150,6 +150,7 @@ class Body {
     struct stateValue {
         unsigned int opened;
         unsigned int closed;
+        unsigned int resolved;
     };
     stateValue currentStateValue;
 

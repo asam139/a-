@@ -432,6 +432,7 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
 
     currentStateValue.opened = 50;
     currentStateValue.closed = 5000;
+    currentStateValue.resolved = 10000;
 
     // 1º Add first node to opened list
     initNode->state = currentStateValue.opened;
@@ -531,6 +532,16 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
 
     } while (!finished);
 
+    Node* node = endNode;
+    node->state = currentStateValue.resolved;
+    do {
+        tiledPosition tiledPosition = node->parent;
+        node = &_nodes[tiledPosition.x][tiledPosition.y];
+
+        node->state = currentStateValue.resolved;
+
+    } while (node != initNode);
+
 }
 
 void Body::DrawNodes() const {
@@ -547,6 +558,11 @@ void Body::DrawNodes() const {
                 fPos.x() = node->position.x * TILED_SIZE;
                 fPos.y() = node->position.y * TILED_SIZE;
                 DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0xFF, 0x00, 0x80);
+            } else if (node->state == currentStateValue.resolved) {
+                Vec2 fPos;
+                fPos.x() = node->position.x * TILED_SIZE;
+                fPos.y() = node->position.y * TILED_SIZE;
+                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0x00, 0xFF, 0x80);
             }
         }
     }
