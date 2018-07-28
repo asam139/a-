@@ -136,6 +136,8 @@ class Body {
         int x;
         int y;
     };
+    size_t _tiledWallLenght = 0;
+    tiledPosition _tiledWall[MAX_PATH_SIZE];
 
     struct  Node { //struct to hold nodes on location list
         tiledPosition position;

@@ -451,6 +451,7 @@ void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTile
     initNode->state = currentStateValue.opened;
 
     // 2º Loop
+    bool founded = false;
     bool finished = false;
     do {
         // A: Search node with minimum F inside opened list
@@ -536,6 +537,7 @@ void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTile
             // D: End node to closed list
             if (nextNode == endNode) {
                 finished = true;
+                founded = true;
             }
 
         } else {
@@ -545,17 +547,25 @@ void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTile
 
     } while (!finished);
 
-    Node* node = endNode;
-    node->state = currentStateValue.resolved;
-    do {
-        tiledPosition tiledPosition = node->parent;
-        node = &_nodes[tiledPosition.x][tiledPosition.y];
 
+    _tiledWallLenght = 0;
+    if (founded) {
+        Node* node = endNode;
         node->state = currentStateValue.resolved;
 
-    } while (node != initNode);
+        _tiledWall[_tiledWallLenght] = node->position;
+        _tiledWallLenght++;
+        do {
+            tiledPosition tiledPosition = node->parent;
+            node = &_nodes[tiledPosition.x][tiledPosition.y];
 
+            node->state = currentStateValue.resolved;
 
+            _tiledWall[_tiledWallLenght] = node->position;
+            _tiledWallLenght++;
+        } while (node != initNode);
+    }
+    printf("Wall Lenght: %d\n", _tiledWallLenght);
 
     end_t = clock();
     printf("End of the big loop, end_t = %ld\n", end_t);

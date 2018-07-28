@@ -25,8 +25,8 @@
 //Size of screen in tiles
 #define COST_MAP_WIDTH 128
 #define COST_MAP_HEIGHT 128
-
 #define TILED_SIZE 8
+#define MAX_PATH_SIZE 512
 
 #define TICKS_PER_SECOND 30
 #define MAX_FRAME_SKIP 10
