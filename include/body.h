@@ -141,7 +141,7 @@ class Body {
         tiledPosition position;
         unsigned int state; //is in open or closed list
         tiledPosition parent; //position on tilemap of his parent (x,y)
-        unsigned short G; //G cost
+        unsigned int G; //G cost
     };
     // Array of nodes in its physical position
     Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
@@ -154,8 +154,7 @@ class Body {
     };
     stateValue currentStateValue;
 
-    void CalculateWalk(Vec2 startPosition, Vec2 finalPosition);
-
+    void CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTiledPosition);
     void DrawNodes() const;
     void InitNodes();
     void PrintNode(const Node &node) const;

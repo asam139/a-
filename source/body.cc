@@ -13,6 +13,7 @@
 #include <movementUtils.h>
 #include <window.h>
 #include <algorithm>
+#include <time.h>
 
 void Body::init(const Color color, const Type type, Agent* agent) {
     _type = type;
@@ -406,29 +407,35 @@ void Body::update_wander(const float dt) {
 void Body::SetFinalPosition(Vec2 finalPosition) {
     _finalPosition = finalPosition;
 
-    CalculateWalk(_state.position, _finalPosition);
-}
-
-// PathFinding
-
-void Body::CalculateWalk(Vec2 startPosition, Vec2 finalPosition) {
-
-    InitNodes();
 
     tiledPosition startTiledPosition = {
-            static_cast<int>(startPosition.x() / TILED_SIZE),
-            static_cast<int>(startPosition.y() / TILED_SIZE)
+            static_cast<int>(_state.position.x() / TILED_SIZE),
+            static_cast<int>(_state.position.y() / TILED_SIZE)
     };
-    Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
-    initNode->state = 0;
-    initNode->parent = startTiledPosition;
-    initNode->G = 0;
-    //PrintNode(*initNode);
 
     tiledPosition endTiledPosition = {
             static_cast<int>(finalPosition.x() / TILED_SIZE),
             static_cast<int>(finalPosition.y() / TILED_SIZE)
     };
+
+    CalculateWalk(startTiledPosition, endTiledPosition);
+}
+
+// PathFinding
+
+void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTiledPosition) {
+    clock_t start_t, end_t;
+
+    start_t = clock();
+    printf("Starting of the program, start_t = %ld\n", start_t);
+
+    InitNodes();
+
+    Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
+    initNode->state = 0;
+    initNode->parent = startTiledPosition;
+    initNode->G = 0;
+    //PrintNode(*initNode);
 
     Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
     endNode->state = 0;
@@ -459,7 +466,7 @@ void Body::CalculateWalk(Vec2 startPosition, Vec2 finalPosition) {
                 unsigned int G = node->G;
                 unsigned int H = heuristicManhattan(*node, *endNode);
                 unsigned int F = G + H;
-                if (F <= minF) {
+                if (F < minF) {
                     minF = F;
                     nextNode = node;
                 }
@@ -547,6 +554,14 @@ void Body::CalculateWalk(Vec2 startPosition, Vec2 finalPosition) {
         node->state = currentStateValue.resolved;
 
     } while (node != initNode);
+
+
+
+    end_t = clock();
+    printf("End of the big loop, end_t = %ld\n", end_t);
+
+    double endTime = (double)(end_t - start_t) / (double)CLOCKS_PER_SEC;
+    printf("Total time taken by CPU: %f\n", endTime);
 }
 
 void Body::DrawNodes() const {
