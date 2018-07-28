@@ -433,14 +433,17 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
     currentStateValue.opened = 50;
     currentStateValue.closed = 5000;
 
+    // 1º Add first node to opened list
     initNode->state = currentStateValue.opened;
 
+    // 2º Loop
     bool finished = false;
     do {
-        int minF = INT_MAX;
+        // A: Search node with minimum F inside opened list
+        unsigned int minF = UINT_MAX;
         Node *nextNode = nullptr;
-        for (int i = 0; i < COST_MAP_WIDTH; ++i) {
-            for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
+        for (int i = 0; i < COST_MAP_WIDTH; i++) {
+            for (int j = 0; j < COST_MAP_HEIGHT; j++) {
                 Node *node = &_nodes[i][j];
                 if (node->state != currentStateValue.opened) {
                     continue;
@@ -449,19 +452,82 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
                 unsigned int G = node->G;
                 unsigned int H = heuristicManhattan(*node, *endNode);
                 unsigned int F = G + H;
-                if (F < minF) {
+                if (F <= minF) {
+                    minF = F;
                     nextNode = node;
                 }
 
             }
         }
 
+
         if (nextNode != nullptr) {
             PrintNode(*nextNode);
+
+            // B: Move to closed list
+            nextNode->state = currentStateValue.closed;
+
+
+            // C: Search to 8 adjacent nodes
+            tiledPosition nextTiledPos = nextNode->position;
+            int nextG = nextNode->G;
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    if (j == 0 && i == 0) {
+                        continue;
+                    }
+
+                    tiledPosition tiledPos = {0, 0};
+                    tiledPos.x = nextTiledPos.x + i;
+                    tiledPos.y = nextTiledPos.y + j;
+                    if (tiledPos.x < 0 || tiledPos.x >= COST_MAP_WIDTH ||
+                            tiledPos.y < 0 || tiledPos.y >= COST_MAP_WIDTH) {
+                        continue;
+                    }
+
+                    // Check if adjacent node was closed
+                    Node* adjacentNode = &_nodes[tiledPos.x][tiledPos.y];
+                    if (adjacentNode->state == currentStateValue.closed) {
+                        continue;
+                    }
+
+                    // Check if node is walkable/no walkable
+                    World* world = _agent->getWorld();
+                    uint8_t cost = world->getCostMapFor(tiledPos.x, tiledPos.y);
+                    if (cost == 1) {
+                        continue;
+                    }
+
+                    int isDiagonal = abs(i) + abs(j) == 2;
+                    int costG = isDiagonal ? 14 : 10;
+
+                    int newG = nextG + costG;
+                    if (adjacentNode->state != currentStateValue.opened) {
+                        // Move to opened list
+                        adjacentNode->state = currentStateValue.opened;
+                        adjacentNode->parent = nextTiledPos;
+                        adjacentNode->G = newG;
+                    } else {
+                        // Node already in opened list
+                        if (adjacentNode->G > newG) {
+                            adjacentNode->parent = nextTiledPos;
+                            adjacentNode->G = newG;
+                        }
+
+                    }
+                }
+            }
+
+
+            // D: End node to closed list
+            if (nextNode == endNode) {
+                finished = true;
+            }
+
+        } else {
+            // D: it does not exist a wall
+            finished = true;
         }
-        finished = true;
-
-
 
     } while (!finished);
 
