@@ -38,8 +38,13 @@ public:
     void SetFinalPosition(Vec2 finalPosition) {
         body_.SetFinalPosition(finalPosition);
     }
+
+    World* getWorld() {
+        return world_;
+    }
+
 private:
-    World * world_;
+    World* world_;
 
     Body body_;
     Mind mind_;

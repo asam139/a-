@@ -133,8 +133,8 @@ class Body {
     MathLib::Vec2 _finalPosition = {0.0f, 0.0f};
 
     struct tiledPosition {
-        unsigned int x;
-        unsigned int y;
+        int x;
+        int y;
     };
 
     struct  Node { //struct to hold nodes on location list

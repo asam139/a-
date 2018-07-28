@@ -8,6 +8,7 @@
 #include <body.h>
 #include <defines.h>
 #include <debug_draw.h>
+#include <world.h>
 #include <agent.h>
 #include <movementUtils.h>
 #include <window.h>
@@ -409,8 +410,8 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
     InitNodes();
 
     tiledPosition startTiledPosition = {
-            static_cast<unsigned int>(_state.position.x() / TILED_SIZE),
-            static_cast<unsigned int>(_state.position.y() / TILED_SIZE)
+            static_cast<int>(_state.position.x() / TILED_SIZE),
+            static_cast<int>(_state.position.y() / TILED_SIZE)
     };
     Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
     initNode->state = 0;
@@ -419,8 +420,8 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
     PrintNode(*initNode);
 
     tiledPosition endTiledPosition = {
-            static_cast<unsigned int>(_finalPosition.x() / TILED_SIZE),
-            static_cast<unsigned int>(_finalPosition.y() / TILED_SIZE)
+            static_cast<int>(_finalPosition.x() / TILED_SIZE),
+            static_cast<int>(_finalPosition.y() / TILED_SIZE)
     };
 
     Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
@@ -493,6 +494,7 @@ void Body::InitNodes() {
             node->position.y = j;
             node->parent = {0, 0};
             node->G = 0;
+            node->state = 0;
         }
     }
 }

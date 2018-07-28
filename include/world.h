@@ -34,6 +34,11 @@ public:
     uint8_t (*getCostMap())[COST_MAP_WIDTH][COST_MAP_WIDTH] {
         return &_costMap;
     }
+
+    uint8_t getCostMapFor(uint8_t x, uint8_t y) {
+        return _costMap[x][y];
+    }
+
 private:
     Sprite _mapSprite;
 
