@@ -154,6 +154,8 @@ class Body {
     };
     stateValue currentStateValue;
 
+    void CalculateWalk(Vec2 startPosition, Vec2 finalPosition);
+
     void DrawNodes() const;
     void InitNodes();
     void PrintNode(const Node &node) const;

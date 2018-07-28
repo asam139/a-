@@ -401,34 +401,40 @@ void Body::update_wander(const float dt) {
 }
 
 
-// PathFinding
+
 
 void Body::SetFinalPosition(Vec2 finalPosition) {
     _finalPosition = finalPosition;
 
+    CalculateWalk(_state.position, _finalPosition);
+}
+
+// PathFinding
+
+void Body::CalculateWalk(Vec2 startPosition, Vec2 finalPosition) {
 
     InitNodes();
 
     tiledPosition startTiledPosition = {
-            static_cast<int>(_state.position.x() / TILED_SIZE),
-            static_cast<int>(_state.position.y() / TILED_SIZE)
+            static_cast<int>(startPosition.x() / TILED_SIZE),
+            static_cast<int>(startPosition.y() / TILED_SIZE)
     };
     Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
     initNode->state = 0;
     initNode->parent = startTiledPosition;
     initNode->G = 0;
-    PrintNode(*initNode);
+    //PrintNode(*initNode);
 
     tiledPosition endTiledPosition = {
-            static_cast<int>(_finalPosition.x() / TILED_SIZE),
-            static_cast<int>(_finalPosition.y() / TILED_SIZE)
+            static_cast<int>(finalPosition.x() / TILED_SIZE),
+            static_cast<int>(finalPosition.y() / TILED_SIZE)
     };
 
     Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
     endNode->state = 0;
     endNode->parent = {0, 0};
     endNode->G = 0;
-    PrintNode(*endNode);
+    //PrintNode(*endNode);
 
     currentStateValue.opened = 50;
     currentStateValue.closed = 5000;
@@ -463,7 +469,7 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
 
 
         if (nextNode != nullptr) {
-            PrintNode(*nextNode);
+            //PrintNode(*nextNode);
 
             // B: Move to closed list
             nextNode->state = currentStateValue.closed;
@@ -482,7 +488,7 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
                     tiledPos.x = nextTiledPos.x + i;
                     tiledPos.y = nextTiledPos.y + j;
                     if (tiledPos.x < 0 || tiledPos.x >= COST_MAP_WIDTH ||
-                            tiledPos.y < 0 || tiledPos.y >= COST_MAP_WIDTH) {
+                        tiledPos.y < 0 || tiledPos.y >= COST_MAP_WIDTH) {
                         continue;
                     }
 
@@ -541,7 +547,6 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
         node->state = currentStateValue.resolved;
 
     } while (node != initNode);
-
 }
 
 void Body::DrawNodes() const {
