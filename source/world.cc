@@ -5,8 +5,7 @@
 
 
 World::World() {
-    target_.init(this, Body::Color::Red, Body::Type::Manual);
-    //target_.getKinematic()->position = Vec2(WINDOW_HALF_WIDTH * 0.25f, WINDOW_HALF_HEIGHT * 0.25f);
+    target_.init(this, Body::Color::Red, Body::Type::PathFinding);
     target_.getKinematic()->position = Vec2(0, 0);
 
     //ia_.init(this, Body::Color::Green, Body::Type::Autonomous);

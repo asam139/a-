@@ -12,8 +12,10 @@ class Agent;
 
 class MovementUtils {
 public:
-    static void SeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
+    static void KinematicSeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
                               const float maxSpeed);
+    static void SeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
+                                      const float maxAcceleration);
 
     static void AlignCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
                                const float maxRotation, const float slowAngle, const float fixedTime);

@@ -7,13 +7,20 @@
 #include <agent.h>
 #include <mathlib/vec2.h>
 
-void MovementUtils::SeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
+void MovementUtils::KinematicSeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
                                   const float maxSpeed) {
     state->acceleration = {0.0f, 0.0f};
     state->velocity = (targetState->position - state->position).normalized() * maxSpeed;
 
     steering->acceleration = {0.0f, 0.0f};
     steering->angularAcceleration = 0.0f;
+}
+
+void MovementUtils::SeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
+                                           const float maxAcceleration) {
+    //aceeleration towards the target
+    steering->acceleration = (targetState->position - state->position).normalized() * maxAcceleration;
+    steering->angularAcceleration = 0.0f; //no angular
 }
 
 
@@ -47,7 +54,7 @@ void MovementUtils::PursueCalculate(KinematicStatus *state, const KinematicStatu
     new_target.position += targetState->velocity * prediction;
 
     //delegate to seek behavior with new target
-    MovementUtils::SeekCalculate(state, &new_target, steering, maxSpeed);
+    MovementUtils::KinematicSeekCalculate(state, &new_target, steering, maxSpeed);
 }
 
 void MovementUtils::FaceCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,

@@ -29,6 +29,7 @@ class Body {
     enum class Type {
         Autonomous,
         Manual,
+        PathFinding
     };
 
     enum class SteeringMode {
@@ -72,6 +73,7 @@ class Body {
   private:
     void updateManual(const float dt);
     void updateAutonomous(const float dt);
+    void updatePathFinding(const float dt);
     void setOrientation(const MathLib::Vec2& direction);
     void keepInSpeed();
     void keepInBounds();
@@ -136,8 +138,9 @@ class Body {
         int x;
         int y;
     };
-    size_t _tiledWallLenght = 0;
+    unsigned int _tiledWallLenght = 0;
     tiledPosition _tiledWall[MAX_PATH_SIZE];
+    int _nextTiled = -1;
 
     struct  Node { //struct to hold nodes on location list
         tiledPosition position;

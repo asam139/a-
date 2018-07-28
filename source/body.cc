@@ -38,8 +38,10 @@ void Body::init(const Color color, const Type type, Agent* agent) {
 void Body::update(const float dt) {
     if (_type == Type::Autonomous) {
         updateAutonomous(dt);
-    } else {
+    } else if (_type == Type::Manual) {
         updateManual(dt);
+    } else {
+        updatePathFinding(dt);
     }
 
     _sprite.setPosition(_state.position.x(), _state.position.y());
@@ -80,6 +82,44 @@ void Body::updateManual(const float dt) {
 
     dd.green.pos = _state.position;
     dd.green.v = _state.velocity;
+}
+
+void Body::updatePathFinding(const float dt) {
+    if (_tiledWallLenght <= 0) {
+        return;
+    }
+
+    if (_nextTiled == -1) {
+        return;
+    }
+
+    tiledPosition nextTiledPos = _tiledWall[_nextTiled];
+    Vec2 newPos = { (float)nextTiledPos.x * TILED_SIZE, (float)nextTiledPos.y * TILED_SIZE};
+    if ((newPos - _state.position).length() < 0.5 * TILED_SIZE) {
+        _nextTiled--;
+    }
+    newPos = {(newPos.x() + _state.position.x())/2.0f, (newPos.y() + _state.position.y())/2.0f,};
+
+    KinematicStatus newStatus;
+    newStatus.position = newPos;
+
+    MovementUtils::KinematicSeekCalculate(&_state, &newStatus, &_steering, _maxSpeed);
+    setOrientation(_state.velocity);
+    //MovementUtils::AlignCalculate(&_state, &newStatus, &_steering, _maxRotation, _slowAngle, _fixedTime);
+
+    updateKinematic(dt, _steering);
+
+    keepInBounds();
+
+    dd.green.pos = _state.position;
+    dd.green.v = _state.velocity * 25.0f;
+
+    dd.red.pos = _state.position;
+    dd.red.v = {0.0f, 0.0f};
+
+    dd.blue.pos = _state.position;
+    dd.blue.v = {0.0f, 0.0f};
+
 }
 
 void Body::render() const {
@@ -149,7 +189,7 @@ void Body::updateKinematic(const float dt, const KinematicSteering& steering) {
 }
 
 void Body::update_kinematic_seek(const float dt) {
-    MovementUtils::SeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
+    MovementUtils::KinematicSeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
 
     updateKinematic(dt, _steering);
 
@@ -165,9 +205,7 @@ void Body::update_kinematic_seek(const float dt) {
 }
 
 void Body::update_seek(const float dt) {
-    //aceeleration towards the target
-    _steering.acceleration = (_target->getKinematic()->position - _state.position).normalized() * _maxAcceleration;
-    _steering.angularAcceleration = 0.0f; //no angular
+    MovementUtils::SeekCalculate(&_state, _target->getKinematic(), &_steering, _maxAcceleration);
 
     updateKinematic(dt, _steering);
 
@@ -352,7 +390,7 @@ void Body::update_pursue(const float dt) {
 void Body::update_face(const float dt) {
     // Add movement to see direction changed
     MovementUtils::PursueCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed, _maxPrediction);
-    //MovementUtils::SeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
+    //MovementUtils::KinematicSeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
     MovementUtils::FaceCalculate(&_state, _target->getKinematic(), &_steering, _maxRotation, _slowAngle, _fixedTime);
 
     updateKinematic(dt, _steering);
@@ -370,7 +408,7 @@ void Body::update_face(const float dt) {
 void Body::update_lookgoing(const float dt) {
     // Add movement to see direction changed
     MovementUtils::PursueCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed, _maxPrediction);
-    //MovementUtils::SeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
+    //MovementUtils::KinematicSeekCalculate(&_state, _target->getKinematic(), &_steering, _maxSpeed);
 
     MovementUtils::LookGoingCalculate(&_state, _target->getKinematic(), &_steering, _maxRotation, _slowAngle, _fixedTime);
 
@@ -549,21 +587,20 @@ void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTile
 
 
     _tiledWallLenght = 0;
+    _nextTiled = -1;
     if (founded) {
         Node* node = endNode;
-        node->state = currentStateValue.resolved;
-
-        _tiledWall[_tiledWallLenght] = node->position;
-        _tiledWallLenght++;
         do {
-            tiledPosition tiledPosition = node->parent;
-            node = &_nodes[tiledPosition.x][tiledPosition.y];
-
             node->state = currentStateValue.resolved;
-
             _tiledWall[_tiledWallLenght] = node->position;
             _tiledWallLenght++;
+
+
+            tiledPosition tiledPosition = node->parent;
+            node = &_nodes[tiledPosition.x][tiledPosition.y];
         } while (node != initNode);
+
+        _nextTiled = _tiledWallLenght - 1;
     }
     printf("Wall Lenght: %d\n", _tiledWallLenght);
 
