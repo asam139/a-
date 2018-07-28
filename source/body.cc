@@ -500,23 +500,23 @@ void Body::InitNodes() {
 }
 
 void Body::PrintNode(const Node &node) const {
-    printf("Node: position(%d, %d)", node.position.x, node.position.y);
+    printf("Node: position(%d, %d)\n", node.position.x, node.position.y);
 }
 
 uint16_t Body::heuristicManhattan(const Node& node, const Node& goal) {
-    const uint16_t xDist = node.position.x - goal.position.x;
-    const uint16_t yDist = node.position.x - goal.position.y;
+    const uint16_t xDist = abs(node.position.x - goal.position.x);
+    const uint16_t yDist = abs(node.position.x - goal.position.y);
     return 10 * (xDist + yDist);
 }
 
 uint16_t Body::heuristicDiagonal(const Node& node, const Node& goal) {
-    const uint16_t xDist = node.position.x - goal.position.x;
-    const uint16_t yDist = node.position.y - goal.position.y;
+    const uint16_t xDist = abs(node.position.x - goal.position.x);
+    const uint16_t yDist = abs(node.position.y - goal.position.y);
     return (10 * (xDist + yDist)) + ((14 - (10 * 2)) * std::min(xDist, yDist));
 }
 
 uint16_t Body::heuristicEuclidean(const Node& node, const Node& goal) {
-    const uint16_t xDist = node.position.x - goal.position.x;
-    const uint16_t yDist = node.position.y - goal.position.y;
+    const uint16_t xDist = abs(node.position.x - goal.position.x);
+    const uint16_t yDist = abs(node.position.y - goal.position.y);
     return 10 * sqrt((xDist * xDist) + (yDist * yDist));
 }
