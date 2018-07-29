@@ -30,7 +30,7 @@ void Body::init(const Color color, const Type type, Agent* agent) {
 
     _steering_mode = SteeringMode::Kinematic_Seek;
 
-    _pathFinding.init(_agent->getWorld());
+    _pathFinding.Init(_agent->getWorld());
 }
 
 void Body::update(const float dt) {

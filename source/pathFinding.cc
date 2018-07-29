@@ -14,10 +14,14 @@ PathFinding::~PathFinding() {
 
 }
 
-void PathFinding::init(World *world) {
+void PathFinding::Init(World *world) {
     _world = world;
+    _heuristicMode = HeuristicMode::Manhattan;
 
     InitNodes();
+}
+void PathFinding::SetHeuristicMode(HeuristicMode mode) {
+    _heuristicMode = mode;
 }
 
 void PathFinding::InitNodes() {
@@ -83,7 +87,7 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
                 }
 
                 unsigned int G = node->G;
-                unsigned int H = heuristicManhattan(*node, *endNode);
+                unsigned int H = heuristic(*node, *endNode);
                 unsigned int F = G + H;
                 if (F < minF) {
                     minF = F;
@@ -211,6 +215,17 @@ void PathFinding::DrawNodes() const {
 
 void PathFinding::PrintNode(const Node &node) const {
     printf("Node: position(%d, %d)\n", node.position.x, node.position.y);
+}
+
+uint16_t PathFinding::heuristic(const Node& node, const Node& goal) {
+    switch (_heuristicMode) {
+        case HeuristicMode::Manhattan:
+            return heuristicManhattan(node, goal);
+        case HeuristicMode::Diagonal:
+            return heuristicDiagonal(node, goal);
+        case HeuristicMode::Euclidean:
+            return heuristicEuclidean(node, goal);
+    }
 }
 
 uint16_t PathFinding::heuristicManhattan(const Node& node, const Node& goal) {
