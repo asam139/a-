@@ -55,6 +55,14 @@ struct tiledPosition {
     int y;
 };
 
+struct  Node { //struct to hold nodes on location list
+    tiledPosition position;
+    unsigned int state; //is in open or closed list
+    tiledPosition parent; //position on tilemap of his parent (x,y)
+    unsigned int G; //G cost
+    unsigned int F; //F cost
+};
+
 struct KinematicStatus {
     MathLib::Vec2 position { 0.0f, 0.0f };
     MathLib::Vec2 velocity { 0.0f, 0.0f }; //linear velocity

@@ -33,6 +33,7 @@ void PathFinding::InitNodes() {
             node->position.y = j;
             node->parent = {0, 0};
             node->G = 0;
+            node->F = 0;
             node->state = 0;
         }
     }
@@ -66,12 +67,10 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
     initNode->state = 0;
     initNode->parent = startTiledPosition;
     initNode->G = 0;
+    initNode->F = 0;
     //PrintNode(*initNode);
 
     Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
-    endNode->state = 0;
-    endNode->parent = {0, 0};
-    endNode->G = 0;
     //PrintNode(*endNode);
 
     // 1º Add first node to opened list
@@ -91,14 +90,11 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
                     continue;
                 }
 
-                unsigned int G = node->G;
-                unsigned int H = heuristic(*node, *endNode);
-                unsigned int F = G + H;
+                unsigned int F = node->F;
                 if (F < minF) {
                     minF = F;
                     nextNode = node;
                 }
-
             }
         }
 
@@ -143,18 +139,29 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
                     int costG = isDiagonal ? 14 : 10;
 
                     int newG = nextG + costG;
-                    if (adjacentNode->state != currentStateValue.opened) {
-                        // Move to opened list
-                        adjacentNode->state = currentStateValue.opened;
-                        adjacentNode->parent = nextTiledPos;
-                        adjacentNode->G = newG;
-                    } else {
+
+                    bool recalculateF = false;
+                    if (adjacentNode->state == currentStateValue.opened) {
                         // Node already in opened list
                         if (adjacentNode->G > newG) {
                             adjacentNode->parent = nextTiledPos;
                             adjacentNode->G = newG;
+                            recalculateF = true;
                         }
+                    } else {
+                        // Move to opened list
+                        adjacentNode->state = currentStateValue.opened;
+                        adjacentNode->parent = nextTiledPos;
+                        adjacentNode->G = newG;
+
+                        recalculateF = true;
                     }
+
+                    if (recalculateF) {
+                        unsigned int H = heuristic(*adjacentNode, *endNode);
+                        adjacentNode->F = adjacentNode->G + H;
+                    }
+
                 }
             }
 

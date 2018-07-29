@@ -35,13 +35,6 @@ private:
     World* _world;
     HeuristicMode _heuristicMode;
 
-    struct  Node { //struct to hold nodes on location list
-        tiledPosition position;
-        unsigned int state; //is in open or closed list
-        tiledPosition parent; //position on tilemap of his parent (x,y)
-        unsigned int G; //G cost
-    };
-
     // Array of nodes in its physical position
     Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
 
