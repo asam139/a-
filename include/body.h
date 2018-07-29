@@ -132,8 +132,7 @@ class Body {
     KinematicStatus _state;
     KinematicSteering _steering;
 
-    MathLib::Vec2 _finalPosition = {0.0f, 0.0f};
-
+    // Path Finding
     PathFinding _pathFinding;
     unsigned int _tiledWallLenght = 0;
     tiledPosition _tiledWall[MAX_PATH_SIZE];

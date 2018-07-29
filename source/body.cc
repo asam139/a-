@@ -19,7 +19,6 @@ void Body::init(const Color color, const Type type, Agent* agent) {
     _type = type;
     _color = color;
     _agent = agent;
-    _agentGroup;
 
     switch(color) {
         case Color::Green: _sprite.loadFromFile(AGENT_GREEN_PATH); break;
@@ -32,7 +31,6 @@ void Body::init(const Color color, const Type type, Agent* agent) {
     _steering_mode = SteeringMode::Kinematic_Seek;
 
     _pathFinding.init(_agent->getWorld());
-    _finalPosition = _state.position;
 }
 
 void Body::update(const float dt) {
@@ -443,9 +441,6 @@ void Body::update_wander(const float dt) {
 
 
 void Body::SetFinalPosition(Vec2 finalPosition) {
-    _finalPosition = finalPosition;
-
-
     tiledPosition startTiledPosition = {
             static_cast<int>(_state.position.x() / TILED_SIZE),
             static_cast<int>(_state.position.y() / TILED_SIZE)
