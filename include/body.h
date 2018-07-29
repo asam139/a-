@@ -11,7 +11,7 @@
 #include <sprite.h>
 #include <defines.h>
 #include <mathlib/vec2.h>
-#include <vector>
+#include <pathFinding.h>
 
 using MathLib::Vec2;
 
@@ -134,39 +134,10 @@ class Body {
 
     MathLib::Vec2 _finalPosition = {0.0f, 0.0f};
 
-    struct tiledPosition {
-        int x;
-        int y;
-    };
+    PathFinding _pathFinding;
     unsigned int _tiledWallLenght = 0;
     tiledPosition _tiledWall[MAX_PATH_SIZE];
     int _nextTiled = -1;
-
-    struct  Node { //struct to hold nodes on location list
-        tiledPosition position;
-        unsigned int state; //is in open or closed list
-        tiledPosition parent; //position on tilemap of his parent (x,y)
-        unsigned int G; //G cost
-    };
-    // Array of nodes in its physical position
-    Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
-
-    //
-    struct stateValue {
-        unsigned int opened;
-        unsigned int closed;
-        unsigned int resolved;
-    };
-    stateValue currentStateValue;
-
-    void CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTiledPosition);
-    void DrawNodes() const;
-    void InitNodes();
-    void PrintNode(const Node &node) const;
-
-    uint16_t heuristicManhattan(const Node& node, const Node& goal);
-    uint16_t heuristicDiagonal(const Node& node, const Node& goal);
-    uint16_t heuristicEuclidean(const Node& node, const Node& goal);
 };
 
 #endif

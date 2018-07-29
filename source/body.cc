@@ -13,7 +13,7 @@
 #include <movementUtils.h>
 #include <window.h>
 #include <algorithm>
-#include <time.h>
+#include <pathFinding.h>
 
 void Body::init(const Color color, const Type type, Agent* agent) {
     _type = type;
@@ -31,7 +31,7 @@ void Body::init(const Color color, const Type type, Agent* agent) {
 
     _steering_mode = SteeringMode::Kinematic_Seek;
 
-
+    _pathFinding.init(_agent->getWorld());
     _finalPosition = _state.position;
 }
 
@@ -130,7 +130,7 @@ void Body::render() const {
     DebugDraw::drawVector(dd.blue.pos, dd.blue.v, 0x00, 0x00, 0xFF, 0xFF);
     DebugDraw::drawPositionHist(_state.position);
 
-    DrawNodes();
+    _pathFinding.DrawNodes();
 }
 
 void Body::setTarget(Agent* target) {
@@ -456,216 +456,6 @@ void Body::SetFinalPosition(Vec2 finalPosition) {
             static_cast<int>(finalPosition.y() / TILED_SIZE)
     };
 
-    CalculateWalk(startTiledPosition, endTiledPosition);
-}
-
-// PathFinding
-
-void Body::CalculateWalk(tiledPosition startTiledPosition, tiledPosition endTiledPosition) {
-    clock_t start_t, end_t;
-
-    start_t = clock();
-    printf("Starting of the program, start_t = %ld\n", start_t);
-
-    InitNodes();
-
-    Node *initNode = &_nodes[startTiledPosition.x][startTiledPosition.y];
-    initNode->state = 0;
-    initNode->parent = startTiledPosition;
-    initNode->G = 0;
-    //PrintNode(*initNode);
-
-    Node *endNode = &_nodes[endTiledPosition.x][endTiledPosition.y];
-    endNode->state = 0;
-    endNode->parent = {0, 0};
-    endNode->G = 0;
-    //PrintNode(*endNode);
-
-    currentStateValue.opened = 50;
-    currentStateValue.closed = 5000;
-    currentStateValue.resolved = 10000;
-
-    // 1º Add first node to opened list
-    initNode->state = currentStateValue.opened;
-
-    // 2º Loop
-    bool founded = false;
-    bool finished = false;
-    do {
-        // A: Search node with minimum F inside opened list
-        unsigned int minF = UINT_MAX;
-        Node *nextNode = nullptr;
-        for (int i = 0; i < COST_MAP_WIDTH; i++) {
-            for (int j = 0; j < COST_MAP_HEIGHT; j++) {
-                Node *node = &_nodes[i][j];
-                if (node->state != currentStateValue.opened) {
-                    continue;
-                }
-
-                unsigned int G = node->G;
-                unsigned int H = heuristicManhattan(*node, *endNode);
-                unsigned int F = G + H;
-                if (F < minF) {
-                    minF = F;
-                    nextNode = node;
-                }
-
-            }
-        }
-
-
-        if (nextNode != nullptr) {
-            //PrintNode(*nextNode);
-
-            // B: Move to closed list
-            nextNode->state = currentStateValue.closed;
-
-
-            // C: Search to 8 adjacent nodes
-            tiledPosition nextTiledPos = nextNode->position;
-            int nextG = nextNode->G;
-            for (int i = -1; i < 2; i++) {
-                for (int j = -1; j < 2; j++) {
-                    if (j == 0 && i == 0) {
-                        continue;
-                    }
-
-                    tiledPosition tiledPos = {0, 0};
-                    tiledPos.x = nextTiledPos.x + i;
-                    tiledPos.y = nextTiledPos.y + j;
-                    if (tiledPos.x < 0 || tiledPos.x >= COST_MAP_WIDTH ||
-                        tiledPos.y < 0 || tiledPos.y >= COST_MAP_WIDTH) {
-                        continue;
-                    }
-
-                    // Check if adjacent node was closed
-                    Node* adjacentNode = &_nodes[tiledPos.x][tiledPos.y];
-                    if (adjacentNode->state == currentStateValue.closed) {
-                        continue;
-                    }
-
-                    // Check if node is walkable/no walkable
-                    World* world = _agent->getWorld();
-                    uint8_t cost = world->getCostMapFor(tiledPos.x, tiledPos.y);
-                    if (cost == 1) {
-                        continue;
-                    }
-
-                    int isDiagonal = abs(i) + abs(j) == 2;
-                    int costG = isDiagonal ? 14 : 10;
-
-                    int newG = nextG + costG;
-                    if (adjacentNode->state != currentStateValue.opened) {
-                        // Move to opened list
-                        adjacentNode->state = currentStateValue.opened;
-                        adjacentNode->parent = nextTiledPos;
-                        adjacentNode->G = newG;
-                    } else {
-                        // Node already in opened list
-                        if (adjacentNode->G > newG) {
-                            adjacentNode->parent = nextTiledPos;
-                            adjacentNode->G = newG;
-                        }
-
-                    }
-                }
-            }
-
-
-            // D: End node to closed list
-            if (nextNode == endNode) {
-                finished = true;
-                founded = true;
-            }
-
-        } else {
-            // D: it does not exist a wall
-            finished = true;
-        }
-
-    } while (!finished);
-
-
-    _tiledWallLenght = 0;
-    _nextTiled = -1;
-    if (founded) {
-        Node* node = endNode;
-        do {
-            node->state = currentStateValue.resolved;
-            _tiledWall[_tiledWallLenght] = node->position;
-            _tiledWallLenght++;
-
-
-            tiledPosition tiledPosition = node->parent;
-            node = &_nodes[tiledPosition.x][tiledPosition.y];
-        } while (node != initNode);
-
-        _nextTiled = _tiledWallLenght - 1;
-    }
-    printf("Wall Lenght: %d\n", _tiledWallLenght);
-
-    end_t = clock();
-    printf("End of the big loop, end_t = %ld\n", end_t);
-
-    double endTime = (double)(end_t - start_t) / (double)CLOCKS_PER_SEC;
-    printf("Total time taken by CPU: %f\n", endTime);
-}
-
-void Body::DrawNodes() const {
-    for (int i = 0; i < COST_MAP_WIDTH; ++i) {
-        for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
-            const Node *node = &_nodes[i][j];
-            if (node->state == currentStateValue.opened) {
-                Vec2 fPos;
-                fPos.x() = node->position.x * TILED_SIZE;
-                fPos.y() = node->position.y * TILED_SIZE;
-                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0xFF, 0x00, 0x00, 0x80);
-            } else if (node->state == currentStateValue.closed) {
-                Vec2 fPos;
-                fPos.x() = node->position.x * TILED_SIZE;
-                fPos.y() = node->position.y * TILED_SIZE;
-                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0xFF, 0x00, 0x80);
-            } else if (node->state == currentStateValue.resolved) {
-                Vec2 fPos;
-                fPos.x() = node->position.x * TILED_SIZE;
-                fPos.y() = node->position.y * TILED_SIZE;
-                DebugDraw::drawRect(fPos, TILED_SIZE, TILED_SIZE, 0x00, 0x00, 0xFF, 0x80);
-            }
-        }
-    }
-}
-
-void Body::InitNodes() {
-    for (int i = 0; i < COST_MAP_WIDTH; ++i) {
-        for (int j = 0; j < COST_MAP_HEIGHT; ++j) {
-            Node *node = &_nodes[i][j];
-            node->position.x = i;
-            node->position.y = j;
-            node->parent = {0, 0};
-            node->G = 0;
-            node->state = 0;
-        }
-    }
-}
-
-void Body::PrintNode(const Node &node) const {
-    printf("Node: position(%d, %d)\n", node.position.x, node.position.y);
-}
-
-uint16_t Body::heuristicManhattan(const Node& node, const Node& goal) {
-    const uint16_t xDist = abs(node.position.x - goal.position.x);
-    const uint16_t yDist = abs(node.position.x - goal.position.y);
-    return 10 * (xDist + yDist);
-}
-
-uint16_t Body::heuristicDiagonal(const Node& node, const Node& goal) {
-    const uint16_t xDist = abs(node.position.x - goal.position.x);
-    const uint16_t yDist = abs(node.position.y - goal.position.y);
-    return (10 * (xDist + yDist)) + ((14 - (10 * 2)) * std::min(xDist, yDist));
-}
-
-uint16_t Body::heuristicEuclidean(const Node& node, const Node& goal) {
-    const uint16_t xDist = abs(node.position.x - goal.position.x);
-    const uint16_t yDist = abs(node.position.y - goal.position.y);
-    return 10 * sqrt((xDist * xDist) + (yDist * yDist));
+    _pathFinding.CalculateWalk(startTiledPosition, endTiledPosition, _tiledWall, &_tiledWallLenght);
+    _nextTiled = _tiledWallLenght - 1;
 }

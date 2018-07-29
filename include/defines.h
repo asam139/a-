@@ -50,6 +50,11 @@
 
 #define SCENE_NUMBER 1
 
+struct tiledPosition {
+    int x;
+    int y;
+};
+
 struct KinematicStatus {
     MathLib::Vec2 position { 0.0f, 0.0f };
     MathLib::Vec2 velocity { 0.0f, 0.0f }; //linear velocity
