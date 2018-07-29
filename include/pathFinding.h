@@ -55,6 +55,7 @@ private:
 
 
     void InitNodes();
+    void ResetCurrentStateValue();
     void PrintNode(const Node &node) const;
 
     uint16_t heuristic(const Node& node, const Node& goal);

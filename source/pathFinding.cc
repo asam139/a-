@@ -19,6 +19,7 @@ void PathFinding::Init(World *world) {
     _heuristicMode = HeuristicMode::Manhattan;
 
     InitNodes();
+    ResetCurrentStateValue();
 }
 void PathFinding::SetHeuristicMode(HeuristicMode mode) {
     _heuristicMode = mode;
@@ -37,6 +38,12 @@ void PathFinding::InitNodes() {
     }
 }
 
+void PathFinding::ResetCurrentStateValue() {
+    currentStateValue.opened = rand() % 100 + 1;
+    currentStateValue.closed = currentStateValue.opened * 10;
+    currentStateValue.resolved = currentStateValue.closed * 100;
+}
+
 void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
                                 tiledPosition endTiledPosition,
                                 tiledPosition *tiledPositions,
@@ -47,6 +54,8 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
     }
 
     clock_t start_t, end_t;
+
+    ResetCurrentStateValue();
 
     start_t = clock();
     printf("Starting of the program, start_t = %ld\n", start_t);
@@ -64,10 +73,6 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
     endNode->parent = {0, 0};
     endNode->G = 0;
     //PrintNode(*endNode);
-
-    currentStateValue.opened = 50;
-    currentStateValue.closed = 5000;
-    currentStateValue.resolved = 10000;
 
     // 1º Add first node to opened list
     initNode->state = currentStateValue.opened;
