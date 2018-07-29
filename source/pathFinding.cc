@@ -55,6 +55,7 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
         printf("PathFinding is not initialized");
         return;
     }
+    _nodeBH.clear();
 
     clock_t start_t, end_t;
 
@@ -77,28 +78,14 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
 
     // 1º Add first node to opened list
     initNode->state = currentStateValue.opened;
+    _nodeBH.insertKey(initNode);
 
     // 2º Loop
     bool founded = false;
     bool finished = false;
     do {
         // A: Search node with minimum F inside opened list
-        unsigned int minF = UINT_MAX;
-        Node *nextNode = nullptr;
-        for (int i = 0; i < COST_MAP_WIDTH; i++) {
-            for (int j = 0; j < COST_MAP_HEIGHT; j++) {
-                Node *node = &_nodes[i][j];
-                if (node->state != currentStateValue.opened) {
-                    continue;
-                }
-
-                unsigned int F = node->F;
-                if (F < minF) {
-                    minF = F;
-                    nextNode = node;
-                }
-            }
-        }
+        Node *nextNode = _nodeBH.extractMin();
 
 
         if (nextNode != nullptr) {
@@ -142,13 +129,16 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
 
                     int newG = nextG + costG;
 
-                    bool recalculateF = false;
                     if (adjacentNode->state == currentStateValue.opened) {
                         // Node already in opened list
                         if (adjacentNode->G > newG) {
                             adjacentNode->parent = nextTiledPos;
                             adjacentNode->G = newG;
-                            recalculateF = true;
+
+                            unsigned int H = heuristic(*adjacentNode, *endNode);
+                            adjacentNode->F = adjacentNode->G + H;
+
+                            _nodeBH.MinHeapify(0);
                         }
                     } else {
                         // Move to opened list
@@ -156,14 +146,11 @@ void PathFinding::CalculateWalk(tiledPosition startTiledPosition,
                         adjacentNode->parent = nextTiledPos;
                         adjacentNode->G = newG;
 
-                        recalculateF = true;
-                    }
-
-                    if (recalculateF) {
                         unsigned int H = heuristic(*adjacentNode, *endNode);
                         adjacentNode->F = adjacentNode->G + H;
-                    }
 
+                        _nodeBH.insertKey(adjacentNode);
+                    }
                 }
             }
 
