@@ -6,9 +6,9 @@
 
 
 // A utility function to swap two elements
-void swap(Node *x, Node *y)
+void swap(Node **x, Node **y)
 {
-    Node temp = *x;
+    Node* temp = *x;
     *x = *y;
     *y = temp;
 }
@@ -18,11 +18,16 @@ NodeBinaryHead::NodeBinaryHead(int cap)
 {
     heap_size = 0;
     capacity = cap;
-    harr = new Node[cap];
+    
+    harr = new Node*[cap];
+}
+
+NodeBinaryHead::~NodeBinaryHead() {
+    delete [] *harr;
 }
 
 // Inserts a new key 'k'
-void NodeBinaryHead::insertKey(Node k)
+void NodeBinaryHead::insertKey(Node* k)
 {
     if (heap_size == capacity)
     {
@@ -36,7 +41,7 @@ void NodeBinaryHead::insertKey(Node k)
     harr[i] = k;
 
     // Fix the min heap property if it is violated
-    while (i != 0 && harr[parent(i)].F > harr[i].F)
+    while (i != 0 && harr[parent(i)]->F > harr[i]->F)
     {
         swap(&harr[i], &harr[parent(i)]);
         i = parent(i);
@@ -47,8 +52,8 @@ void NodeBinaryHead::insertKey(Node k)
 // new_val is smaller than harr[i].
 void NodeBinaryHead::decreaseKey(int i, int new_val)
 {
-    harr[i].F = new_val;
-    while (i != 0 && harr[parent(i)].F > harr[i].F)
+    harr[i]->F = new_val;
+    while (i != 0 && harr[parent(i)]->F > harr[i]->F)
     {
         swap(&harr[i], &harr[parent(i)]);
         i = parent(i);
@@ -63,11 +68,11 @@ Node* NodeBinaryHead::extractMin()
     if (heap_size == 1)
     {
         heap_size--;
-        return &harr[0];
+        return harr[0];
     }
 
     // Store the minimum value, and remove it from heap
-    Node* root = &harr[0];
+    Node* root = harr[0];
     harr[0] = harr[heap_size-1];
     heap_size--;
     MinHeapify(0);
@@ -91,9 +96,9 @@ void NodeBinaryHead::MinHeapify(int i)
     int l = left(i);
     int r = right(i);
     int smallest = i;
-    if (l < heap_size && harr[l].F < harr[i].F)
+    if (l < heap_size && harr[l]->F < harr[i]->F)
         smallest = l;
-    if (r < heap_size && harr[r].F < harr[smallest].F)
+    if (r < heap_size && harr[r]->F < harr[smallest]->F)
         smallest = r;
     if (smallest != i)
     {

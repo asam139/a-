@@ -17,12 +17,13 @@ void swap(Node *x, Node *y);
 // A class for Min Heap
 class NodeBinaryHead
 {
-    Node *harr; // pointer to array of elements in heap
+    Node **harr; // pointer to array of elements in heap
     int capacity; // maximum possible size of min heap
     int heap_size; // Current number of elements in min heap
 public:
     // Constructor
     NodeBinaryHead(int capacity);
+    ~NodeBinaryHead();
 
     // to heapify a subtree with the root at given index
     void MinHeapify(int );
@@ -42,13 +43,13 @@ public:
     void decreaseKey(int i, int new_val);
 
     // Returns the minimum key (key at root) from min heap
-    Node* getMin() { return &harr[0]; }
+    Node* getMin() { return harr[0]; }
 
     // Deletes a key stored at index i
     void deleteKey(int i);
 
     // Inserts a new key 'k'
-    void insertKey(Node k);
+    void insertKey(Node* k);
 
     // clear
     void clear();
