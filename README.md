@@ -1,12 +1,5 @@
-# steering_behaviours
+# Path Finding
 
-Steering behaviours aim to help autonomous characters move in a realistic manner, 
-by using simple forces that are combined to produce life-like, 
-improvisational navigation around the characters' environment. 
+Path Finding using algorithm A* implemented using an Node Array and Binary Head
 
-They are not based on complex strategies involving path planning or global calculations, 
-but instead use local information, such as neighbours forces. 
-This makes them simple to understand and implement, 
-but still able to produce very complex movement patterns.
-
-Video: https://www.youtube.com/watch?v=Zk2B0dk5vHY
+Video: https://github.com/asam139/a-
