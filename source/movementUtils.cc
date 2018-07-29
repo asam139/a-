@@ -10,7 +10,11 @@
 void MovementUtils::KinematicSeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
                                   const float maxSpeed) {
     state->acceleration = {0.0f, 0.0f};
-    state->velocity = (targetState->position - state->position).normalized() * maxSpeed;
+    Vec2 diff = (targetState->position - state->position);
+    if (diff.length2() > 0) {
+        diff = diff.normalized();
+    }
+    state->velocity = diff * maxSpeed;
 
     steering->acceleration = {0.0f, 0.0f};
     steering->angularAcceleration = 0.0f;
@@ -18,8 +22,11 @@ void MovementUtils::KinematicSeekCalculate(KinematicStatus *state, const Kinemat
 
 void MovementUtils::SeekCalculate(KinematicStatus *state, const KinematicStatus *targetState, KinematicSteering* steering,
                                            const float maxAcceleration) {
-    //aceeleration towards the target
-    steering->acceleration = (targetState->position - state->position).normalized() * maxAcceleration;
+    Vec2 diff = (targetState->position - state->position);
+    if (diff.length2() > 0) {
+        diff = diff.normalized();
+    }
+    steering->acceleration = diff * maxAcceleration;
     steering->angularAcceleration = 0.0f; //no angular
 }
 
