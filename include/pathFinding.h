@@ -7,6 +7,7 @@
 
 #import <defines.h>
 #include <mathlib/vec2.h>
+#include <nodeBinaryHead.h>
 
 class World;
 
@@ -37,6 +38,7 @@ private:
 
     // Array of nodes in its physical position
     Node _nodes[COST_MAP_HEIGHT][COST_MAP_WIDTH];
+    NodeBinaryHead _nodeBH;
 
     //
     struct stateValue {

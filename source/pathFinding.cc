@@ -6,7 +6,8 @@
 #include <debug_draw.h>
 #include <world.h>
 
-PathFinding::PathFinding() {
+
+PathFinding::PathFinding() : _nodeBH(COST_MAP_WIDTH * COST_MAP_WIDTH) {
 
 }
 
@@ -17,6 +18,7 @@ PathFinding::~PathFinding() {
 void PathFinding::Init(World *world) {
     _world = world;
     _heuristicMode = HeuristicMode::Manhattan;
+
 
     InitNodes();
     ResetCurrentStateValue();
